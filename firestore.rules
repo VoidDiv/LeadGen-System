@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // A signed-in user counts as an admin only if a document exists at admins/{their uid}.
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Users can check their own admin document. Nobody can write it from the app;
+    // add admins in the Firebase console.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Leads and content live under the admin's own user document.
+    match /users/{uid}/{document=**} {
+      allow read, write: if isAdmin() && request.auth.uid == uid;
+    }
+  }
+}
