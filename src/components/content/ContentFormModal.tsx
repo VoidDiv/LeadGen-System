@@ -1,9 +1,16 @@
+/* ============================================================
+   FILE: components/content/ContentFormModal.tsx   (REPLACE whole file)
+   NEW FIELDS: Caption, Hashtags, Call to action (CTA).
+   The hashtags are tidied when you save ("retirement, #Vets" -> "#retirement #Vets").
+   ============================================================ */
+
 "use client";
 
 import { useState, type FormEvent } from "react";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { CONTENT_STATUSES, CONTENT_TYPES, PLATFORMS } from "@/lib/constants";
+import { normalizeHashtags } from "@/lib/utils";
 import type { ContentInput, ContentItem, ContentStatus, ContentType, Platform } from "@/types";
 
 interface Props {
@@ -19,6 +26,9 @@ export default function ContentFormModal({ item, onClose, onSave }: Props) {
   const [contentType, setContentType] = useState<ContentType>(item?.contentType ?? "Post");
   const [status, setStatus] = useState<ContentStatus>(item?.status ?? "Idea");
   const [scheduledDate, setScheduledDate] = useState(item?.scheduledDate ?? "");
+  const [caption, setCaption] = useState(item?.caption ?? "");
+  const [hashtags, setHashtags] = useState(item?.hashtags ?? "");
+  const [cta, setCta] = useState(item?.cta ?? "");
   const [notes, setNotes] = useState(item?.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +48,9 @@ export default function ContentFormModal({ item, onClose, onSave }: Props) {
         contentType,
         status,
         scheduledDate: scheduledDate || null,
+        caption: caption.trim(),
+        hashtags: normalizeHashtags(hashtags),
+        cta: cta.trim(),
         notes: notes.trim(),
       });
     } catch {
@@ -106,6 +119,43 @@ export default function ContentFormModal({ item, onClose, onSave }: Props) {
               type="date"
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
+              className="input"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="c-caption" className="label">
+            Caption
+          </label>
+          <textarea id="c-caption" rows={4} value={caption} onChange={(e) => setCaption(e.target.value)} className="input" />
+          <p className="mt-1 text-xs text-slate-500" data-testid="caption-count">
+            {caption.length} character{caption.length === 1 ? "" : "s"}
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="c-cta" className="label">
+              Call to action
+            </label>
+            <input
+              id="c-cta"
+              value={cta}
+              onChange={(e) => setCta(e.target.value)}
+              placeholder="e.g. Message me to book a call"
+              className="input"
+            />
+          </div>
+          <div>
+            <label htmlFor="c-hashtags" className="label">
+              Hashtags
+            </label>
+            <input
+              id="c-hashtags"
+              value={hashtags}
+              onChange={(e) => setHashtags(e.target.value)}
+              placeholder="#retirement #veterans"
               className="input"
             />
           </div>

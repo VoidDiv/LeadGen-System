@@ -1,3 +1,8 @@
+/* ============================================================
+   FILE: components/layout/MobileNav.tsx   (REPLACE whole file)
+   CHANGED: grid-cols-4 -> grid-cols-5 (there are now 5 menu items).
+   ============================================================ */
+
 "use client";
 
 import Link from "next/link";
@@ -24,7 +29,7 @@ export default function MobileNav() {
         </button>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-slate-200 bg-white md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white md:hidden">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (

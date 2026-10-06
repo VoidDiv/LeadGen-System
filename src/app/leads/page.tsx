@@ -1,7 +1,14 @@
+/* ============================================================
+   FILE: app/leads/page.tsx   (REPLACE whole file)
+   NEW: filter by state and category group, "Export CSV" (the leads you see),
+        the date contacted is filled in when you change a status to Contacted
+        (or later), and the weekly limit now comes from lib/constants.ts.
+   ============================================================ */
+
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PageHeader from "@/components/ui/PageHeader";
@@ -9,29 +16,29 @@ import LeadFilters from "@/components/leads/LeadFilters";
 import LeadFormModal from "@/components/leads/LeadFormModal";
 import LeadTable from "@/components/leads/LeadTable";
 import { useLeads } from "@/hooks/useLeads";
-import type { Lead, LeadStatus, Platform } from "@/types";
-
-// Change this number to raise or lower the weekly limit.
-const WEEKLY_LEAD_LIMIT = 100;
-
-/** Monday 00:00 (your local time) of the current week. The count resets every Monday. */
-function startOfWeek(now = new Date()): number {
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const daysSinceMonday = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - daysSinceMonday);
-  return d.getTime();
-}
+import { CONTACTED_STATUSES, WEEKLY_LEAD_LIMIT } from "@/lib/constants";
+import { msToISO, todayISO } from "@/lib/dates";
+import { downloadTextFile } from "@/lib/download";
+import { inRange, leadsToCSV, rangeFor } from "@/lib/reports";
+import { groupOfCategory, stateBucket } from "@/lib/targets";
+import type { Lead, LeadInput, LeadStatus, Platform } from "@/types";
 
 export default function LeadsPage() {
   const { leads, loading, error, add, update, remove } = useLeads();
   const [search, setSearch] = useState("");
   const [platform, setPlatform] = useState<Platform | "">("");
   const [status, setStatus] = useState<LeadStatus | "">("");
+  const [state, setState] = useState("");
+  const [group, setGroup] = useState("");
   const [form, setForm] = useState<{ lead: Lead | null } | null>(null);
   const [toDelete, setToDelete] = useState<Lead | null>(null);
 
-  const weekStart = startOfWeek();
-  const addedThisWeek = useMemo(() => leads.filter((l) => l.createdAt >= weekStart).length, [leads, weekStart]);
+  // The count starts again every Monday (your local time): the same "this week" the Dashboard and the Reports use
+  const thisWeek = rangeFor("this-week");
+  const addedThisWeek = useMemo(
+    () => leads.filter((l) => inRange(msToISO(l.createdAt), thisWeek)).length,
+    [leads, thisWeek.from, thisWeek.to], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const limitReached = addedThisWeek >= WEEKLY_LEAD_LIMIT;
 
   const filtered = useMemo(() => {
@@ -40,13 +47,19 @@ export default function LeadsPage() {
       (l) =>
         (!platform || l.platform === platform) &&
         (!status || l.status === status) &&
-        (!q || `${l.name} ${l.category} ${l.notes}`.toLowerCase().includes(q)),
+        (!state || stateBucket(l.state) === state) &&
+        (!group || groupOfCategory(l.category) === group) &&
+        (!q || `${l.name} ${l.category} ${l.profession} ${l.notes}`.toLowerCase().includes(q)),
     );
-  }, [leads, search, platform, status]);
+  }, [leads, search, platform, status, state, group]);
 
   async function changeStatus(lead: Lead, next: LeadStatus) {
+    if (next === lead.status) return;
+    // The reports need the time of the change, and the date contacted (from "Contacted" on) is filled in for you
+    const patch: Partial<LeadInput> = { status: next, statusChangedAt: Date.now() };
+    if (CONTACTED_STATUSES.includes(next) && !lead.dateContacted) patch.dateContacted = todayISO();
     try {
-      await update(lead.id, { status: next });
+      await update(lead.id, patch);
     } catch {
       window.alert("Couldn't change the status. Check your connection and try again.");
     }
@@ -58,13 +71,23 @@ export default function LeadsPage() {
         title="Leads"
         subtitle={`${leads.length} in total · ${addedThisWeek} of ${WEEKLY_LEAD_LIMIT} added this week`}
         action={
-          <Button
-            onClick={() => setForm({ lead: null })}
-            disabled={limitReached}
-            title={limitReached ? "Weekly limit reached" : undefined}
-          >
-            <Plus size={16} /> Add lead
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="secondary"
+              disabled={filtered.length === 0}
+              onClick={() => downloadTextFile(`leads-${todayISO()}.csv`, leadsToCSV(filtered))}
+              title="Download the leads you see as a CSV file (opens in Excel or Google Sheets)"
+            >
+              <Download size={16} /> Export CSV
+            </Button>
+            <Button
+              onClick={() => setForm({ lead: null })}
+              disabled={limitReached}
+              title={limitReached ? "Weekly limit reached" : undefined}
+            >
+              <Plus size={16} /> Add lead
+            </Button>
+          </div>
         }
       />
 
@@ -88,6 +111,10 @@ export default function LeadsPage() {
         onPlatform={setPlatform}
         status={status}
         onStatus={setStatus}
+        state={state}
+        onState={setState}
+        group={group}
+        onGroup={setGroup}
       />
 
       {loading ? (
@@ -109,6 +136,7 @@ export default function LeadsPage() {
         <LeadFormModal
           key={form.lead?.id ?? "new"}
           lead={form.lead}
+          leads={leads}
           onClose={() => setForm(null)}
           onSave={async (input) => {
             if (form.lead) {

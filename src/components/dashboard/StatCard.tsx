@@ -1,6 +1,11 @@
+/* ============================================================
+   FILE: components/dashboard/StatCard.tsx   (REPLACE whole file)
+   CHANGED: `value` can also be text (e.g. "67%" or "—").
+   ============================================================ */
+
 interface Props {
   label: string;
-  value: number;
+  value: number | string;
   /** Tailwind background class for the small status dot */
   dot: string;
   hint?: string;

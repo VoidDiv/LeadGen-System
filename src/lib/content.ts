@@ -1,3 +1,8 @@
+/* ============================================================
+   FILE: lib/content.ts   (REPLACE whole file)
+   CHANGED: toItem also reads caption, hashtags and the call to action.
+   ============================================================ */
+
 import {
   addDoc,
   collection,
@@ -26,6 +31,9 @@ function toItem(d: QueryDocumentSnapshot<DocumentData>): ContentItem {
     contentType: x.contentType ?? "Post",
     status: x.status ?? "Idea",
     scheduledDate: x.scheduledDate ?? null,
+    caption: x.caption ?? "",
+    hashtags: x.hashtags ?? "",
+    cta: x.cta ?? "",
     notes: x.notes ?? "",
     createdAt: x.createdAt?.toMillis?.() ?? Date.now(),
   };

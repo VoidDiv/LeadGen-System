@@ -23,3 +23,29 @@
     @apply rounded-md border border-slate-200 bg-white;
   }
 }
+
+/* Printing a report (Reports > Print / PDF): hide the menus and the buttons, use the whole page */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  aside,
+  header,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  main {
+    padding-left: 0 !important;
+  }
+  main > div {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  .panel {
+    box-shadow: none;
+  }
+}

@@ -1,1 +1,5 @@
-   { "css.lint.unknownAtRules": "ignore" }
+{
+  // Tailwind's @tailwind and @apply are not plain CSS, so VS Code's built-in CSS checker warns about them.
+  // This turns that one warning off. Your code is not affected.
+  "css.lint.unknownAtRules": "ignore"
+}
