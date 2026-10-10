@@ -1,3 +1,9 @@
+/* ============================================================
+   FILE: components/layout/AppShell.tsx   (REPLACE whole file)
+   CHANGED (one line): the bottom padding on phones now includes the
+   iPhone home-bar space, so the last row is never hidden behind the menu.
+   ============================================================ */
+
 "use client";
 
 import { useEffect, type ReactNode } from "react";
@@ -71,7 +77,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <Sidebar />
       <MobileNav />
       <main className="md:pl-60">
-        <div className="mx-auto max-w-6xl px-4 py-6 pb-24 md:px-8 md:py-8 md:pb-8">{children}</div>
+        <div className="mx-auto max-w-6xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-8 md:py-8 md:pb-8">
+          {children}
+        </div>
       </main>
     </>
   );

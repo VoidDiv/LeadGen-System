@@ -1,9 +1,15 @@
+/* ============================================================
+   FILE: components/layout/Sidebar.tsx   (REPLACE whole file)
+   NEW: the "Install app" button above the email and Sign out.
+   ============================================================ */
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import InstallButton from "@/components/pwa/InstallButton";
 import { NAV_ITEMS, isActive } from "./nav";
 
 export default function Sidebar() {
@@ -44,6 +50,9 @@ export default function Sidebar() {
       </nav>
 
       <div className="border-t border-white/10 p-4">
+        <div className="mb-4 empty:hidden">
+          <InstallButton variant="sidebar" />
+        </div>
         <p className="truncate text-xs text-brand-300">{user?.email}</p>
         <button onClick={() => signOut()} className="mt-2 flex items-center gap-2 text-sm text-brand-200 hover:text-white">
           <LogOut size={16} /> Sign out
