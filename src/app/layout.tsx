@@ -2,6 +2,9 @@
    FILE: app/layout.tsx   (REPLACE whole file)
    NEW: app icons, iPhone home-screen settings, the safe-area setting
    (viewportFit "cover") and <RegisterSW /> for the installable app.
+   NEW: a tiny script in <head> that catches the browser's "ready to install"
+   signal the moment it arrives (before the rest of the page has loaded),
+   so the Install button can always use it.
    The manifest is linked automatically from app/manifest.ts.
    ============================================================ */
 
@@ -54,9 +57,15 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// Runs before React: keeps the browser's install signal for the Install button
+const CATCH_INSTALL_SIGNAL = `window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__gfiInstall=e;window.dispatchEvent(new Event("gfi-install-ready"));});`;
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={sans.variable}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: CATCH_INSTALL_SIGNAL }} />
+      </head>
       <body className="min-h-screen font-sans">
         <AuthProvider>
           <AppShell>{children}</AppShell>
@@ -65,4 +74,4 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </body>
     </html>
   );
-} 
+}
