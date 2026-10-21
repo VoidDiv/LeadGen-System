@@ -1,8 +1,9 @@
 /* ============================================================
    FILE: lib/constants.ts   (REPLACE whole file)
-   CHANGED: the lead statuses follow your workflow
+   CHANGED: weekly lead limit raised from 100 to 400.
+   Earlier: the lead statuses follow your workflow
    (Find -> Qualify -> Engage -> Contact -> Follow up -> Appointment), a new
-   "Engaged" status, the new "Response" choices, and the weekly limit now
+   "Engaged" status, the new "Response" choices, and the weekly limit
    lives here (the Leads page and the Dashboard both use it).
    Statuses saved before keep working: nothing was renamed.
    ============================================================ */
@@ -31,7 +32,7 @@ export const CONTENT_STATUSES = ["Idea", "Draft", "Scheduled", "Published"] as c
 export const CONTENT_TYPES = ["Post", "Reel", "Story", "Video", "Carousel", "Article"] as const;
 
 /** Change this number to raise or lower the weekly limit of new leads. */
-export const WEEKLY_LEAD_LIMIT = 100;
+export const WEEKLY_LEAD_LIMIT = 400;
 
 /** From "Contacted" on, the lead has been contacted: the date contacted is filled in for you when it is empty. */
 export const CONTACTED_STATUSES: readonly LeadStatus[] = ["Contacted", "Responded", "Appointment", "Converted"];

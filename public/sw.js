@@ -8,20 +8,30 @@
    - It never touches Firebase (sign-in and the leads data). The leads are kept
      on the phone by Firestore itself (see lib/firebase.ts).
    To make every phone drop its old copies, change VERSION and deploy.
+   CHANGED (v2): a missing file no longer stops the app from installing.
    ============================================================ */
 
-const VERSION = "gfi-v1";
+const VERSION = "gfi-v2";
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGE_CACHE = `${VERSION}-pages`;
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png"];
 
+// Each file is saved on its own: if one is missing (404), the others are still saved
+// and the service worker still installs. (With addAll, ONE missing file stops the
+// whole service worker, and then the phone says the app can't be installed.)
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(PRECACHE))
+      .then((cache) =>
+        Promise.all(
+          PRECACHE.map((url) =>
+            cache.add(url).catch((err) => console.warn("[sw] Could not save", url, err)),
+          ),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
