@@ -1,5 +1,8 @@
 /* ============================================================
-   FILE: components/dashboard/PipelineFunnel.tsx   (NEW)
+   FILE: src/components/dashboard/PipelineFunnel.tsx   (REPLACE whole file)
+   CHANGED: added the "No Answer" and "Invalid Number" stages (fixes the
+   build error). Their bars use the same colors as their badges:
+   orange for No Answer, gray for Invalid Number.
    Where your leads are RIGHT NOW, in the order of your workflow:
    Find -> Qualify -> Engage -> Contact -> Follow up -> Appointment.
    ============================================================ */
@@ -12,10 +15,19 @@ const STAGE_LABEL: Record<LeadStatus, string> = {
   Qualified: "Qualified",
   Engaged: "Engaged",
   Contacted: "Contacted",
+  "No Answer": "No answer",
+  "Invalid Number": "Invalid number",
   Responded: "Responded",
   Appointment: "Appointment",
   Converted: "Converted",
   "Not Interested": "Not interested",
+};
+
+/** Bar color per stage; anything not listed uses the brand color. */
+const BAR_COLOR: Partial<Record<LeadStatus, string>> = {
+  "No Answer": "bg-orange-400",
+  "Invalid Number": "bg-zinc-400",
+  "Not Interested": "bg-rose-400",
 };
 
 export default function PipelineFunnel({ leads }: { leads: Lead[] }) {
@@ -37,7 +49,7 @@ export default function PipelineFunnel({ leads }: { leads: Lead[] }) {
               </div>
               <div className="h-2 rounded-full bg-slate-100">
                 <div
-                  className={`h-2 rounded-full ${s === "Not Interested" ? "bg-rose-400" : "bg-brand-600"}`}
+                  className={`h-2 rounded-full ${BAR_COLOR[s] ?? "bg-brand-600"}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
