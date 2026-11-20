@@ -1,10 +1,12 @@
 /* ============================================================
    FILE: lib/constants.ts   (REPLACE whole file)
-   CHANGED: weekly lead limit raised from 100 to 400.
-   Earlier: the lead statuses follow your workflow
-   (Find -> Qualify -> Engage -> Contact -> Follow up -> Appointment), a new
-   "Engaged" status, the new "Response" choices, and the weekly limit
-   lives here (the Leads page and the Dashboard both use it).
+   CHANGED: two new lead statuses right after "Contacted":
+   "No Answer" and "Invalid Number". Both count as contacted, so the
+   date contacted is filled in for you when it is empty.
+   Earlier: weekly lead limit raised from 100 to 400; the lead statuses
+   follow your workflow (Find -> Qualify -> Engage -> Contact -> Follow up
+   -> Appointment), an "Engaged" status, the "Response" choices, and the
+   weekly limit lives here (the Leads page and the Dashboard both use it).
    Statuses saved before keep working: nothing was renamed.
    ============================================================ */
 
@@ -13,12 +15,14 @@ import { ALL_CATEGORIES } from "./targets";
 
 export const PLATFORMS = ["LinkedIn", "Facebook", "Instagram", "TikTok"] as const;
 
-/** In workflow order: New (found) -> Qualified -> Engaged -> Contacted -> Responded -> Appointment -> Converted. */
+/** In workflow order: New (found) -> Qualified -> Engaged -> Contacted (-> No Answer / Invalid Number) -> Responded -> Appointment -> Converted. */
 export const LEAD_STATUSES = [
   "New",
   "Qualified",
   "Engaged",
   "Contacted",
+  "No Answer",
+  "Invalid Number",
   "Responded",
   "Appointment",
   "Converted",
@@ -35,7 +39,14 @@ export const CONTENT_TYPES = ["Post", "Reel", "Story", "Video", "Carousel", "Art
 export const WEEKLY_LEAD_LIMIT = 400;
 
 /** From "Contacted" on, the lead has been contacted: the date contacted is filled in for you when it is empty. */
-export const CONTACTED_STATUSES: readonly LeadStatus[] = ["Contacted", "Responded", "Appointment", "Converted"];
+export const CONTACTED_STATUSES: readonly LeadStatus[] = [
+  "Contacted",
+  "No Answer",
+  "Invalid Number",
+  "Responded",
+  "Appointment",
+  "Converted",
+];
 
 /** Statuses that count as an appointment / opportunity. */
 export const OPPORTUNITY_STATUSES: readonly LeadStatus[] = ["Appointment", "Converted"];
@@ -55,6 +66,8 @@ export const LEAD_STATUS_STYLES: Record<LeadStatus, string> = {
   Qualified: "bg-amber-100 text-amber-800",
   Engaged: "bg-cyan-100 text-cyan-800",
   Contacted: "bg-blue-100 text-blue-800",
+  "No Answer": "bg-orange-100 text-orange-800",
+  "Invalid Number": "bg-zinc-200 text-zinc-700",
   Responded: "bg-violet-100 text-violet-800",
   Appointment: "bg-teal-100 text-teal-800",
   Converted: "bg-emerald-100 text-emerald-800",
